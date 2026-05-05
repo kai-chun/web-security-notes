@@ -62,10 +62,20 @@ SELECT * FROM users WHERE username = 'administrator'--' AND password = 'x'
 
 ## 3. 防禦者視角（Fix）
 
-- **正確寫法**：
-- **縱深防禦**：
+- **正確寫法 — Parameterized Query / Prepared Statement**
 
-- **常見錯誤修法（為什麼擋不住）**：
+  把使用者輸入交給 DB driver 當「資料」處理，而不是讓它變成 SQL 語法的一部分。
+
+  ```python
+  query = "SELECT * FROM users WHERE username = ? AND password = ?"
+  user = conn.execute(query, (username, password)).fetchone()
+  ```
+
+  關鍵不是「`?` 這個符號」，而是 SQL template 在 driver 裡跟參數是**分開傳輸/分開解析**的——template 先送給 DB engine 編譯成 prepared plan，參數再 bind 進去；參數值無論長什麼樣都不會被當成 SQL token，`administrator'--` 整串只是個普通字串。
+
+- **縱深防禦（不取代 #1，只是縮小爆炸半徑）**
+  - **通用錯誤訊息**：不要把 code error 直接回給 client。攻擊者靠錯誤訊息推敲 schema 是 blind SQLi 之前的標準偵察動作。隱藏 Server-side log 細節，client 只能看到 `Login failed`。
+  - **登入語意統一**：username 不存在 vs 密碼錯誤都回 `Invalid credentials`，避免成為帳號列舉（user enumeration）的副作用注入點。
 
 
 ## 4. 延伸與反思
