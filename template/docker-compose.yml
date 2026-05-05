@@ -1,21 +1,29 @@
 services:
   vuln-py:
-    build: ./vulnerable_app/python
+    build:
+      context: ./vulnerable_app/python
+      dockerfile: ../../python.Dockerfile
     ports: ["8001:5000"]
     profiles: ["py"]
 
   vuln-go:
-    build: ./vulnerable_app/go
+    build:
+      context: ./vulnerable_app/go
+      dockerfile: ../../go.Dockerfile
     ports: ["8002:5000"]
     profiles: ["go"]
 
   secure-py:
-    build: ./secure_app/python
+    build:
+      context: ./secure_app/python
+      dockerfile: ../../python.Dockerfile
     ports: ["8003:5000"]
     profiles: ["py"]
 
   secure-go:
-    build: ./secure_app/go
+    build:
+      context: ./secure_app/go
+      dockerfile: ../../go.Dockerfile
     ports: ["8004:5000"]
     profiles: ["go"]
 
