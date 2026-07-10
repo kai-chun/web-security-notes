@@ -1,0 +1,37 @@
+# Sigma rule — 打「應用 debug log」，本 lab 可直接命中
+# 參考：https://github.com/SigmaHQ/sigma-specification
+title: SQL Injection Login Bypass — Attempt in Application SQL Log
+id: 32acfa56-50ea-47fe-8a38-a167da9e642c
+status: experimental
+description: >
+  偵測登入查詢的 SQL 中出現注入特徵（註解序列、恆真條件），
+  對應 SQLi login bypass（administrator'-- / ' OR 1=1--）。
+references:
+  - https://portswigger.net/web-security/sql-injection/lab-login-bypass
+  - ../writeup.md
+author: Kai-Chun Yang
+date: 2026/07/01
+logsource:
+  category: application
+  product: login-app        # go/python vuln app 的 [DEBUG] Executing: 行
+detection:
+  # 這行的攻擊特徵：註解截斷、恆真條件、UNION
+  sqli_markers:
+    message|contains:
+      - "'--"
+      - "' OR "
+      - "' or "
+      - "OR 1=1"
+      - "or 1=1"
+      - "UNION SELECT"
+      - "union select"
+  is_login_query:
+    message|contains: 'WHERE username ='
+  condition: sqli_markers and is_login_query
+falsepositives:
+  - 名字含撇號的合法使用者（O'Brien）— 靠「組合特徵」而非單一 ' 來收斂
+  - 內部安全測試 / 掃描（應在告警時排除已知測試來源）
+level: high
+tags:
+  - attack.initial_access
+  - attack.t1190          # Exploit Public-Facing Application
