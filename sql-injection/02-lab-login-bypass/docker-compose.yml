@@ -20,18 +20,15 @@ services:
     ports: ["8003:5000"]
     profiles: ["py"]
 
-  secure-go:
-    build:
-      context: ./secure_app/go
-      dockerfile: ../../go.Dockerfile
-    ports: ["8004:5000"]
-    profiles: ["go"]
-
-  # add a `db:` service with `profiles: ["py","go"]` if the lab needs an external DB
-  # exploits/ are run as one-off scripts (python exploits/python/exploit.py),
-  # not as compose services.
+  # uncomment once secure_app/go/main.go exists
+  # secure-go:
+  #   build:
+  #     context: ./secure_app/go
+  #     dockerfile: ../../go.Dockerfile
+  #   ports: ["8004:5000"]
+  #   profiles: ["go"]
 
 # usage:
-#   docker compose --profile py up
-#   docker compose --profile go up
-#   docker compose --profile py --profile go up
+#   docker compose --profile py up         # python stack only
+#   docker compose --profile go up         # go stack only
+#   docker compose --profile py --profile go up   # both, side-by-side

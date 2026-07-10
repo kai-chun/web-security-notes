@@ -1,0 +1,36 @@
+# Sigma rule — 打「HTTP request body」，貼近上線 WAF/access log
+# 現實中不會把完整 SQL 印進 log，這條才是實務上的偵測點。
+# 參考：https://github.com/SigmaHQ/sigma-specification
+title: SQL Injection Login Bypass — Attempt in HTTP Login Request
+id: 4302b7c4-75cd-4b2c-a074-724c14718592
+status: experimental
+description: >
+  偵測登入 POST 的表單欄位（username/password）中出現 SQLi meta 字元組合，
+  對應 SQLi login bypass。適用於有記錄 request body 的 WAF / reverse proxy log。
+references:
+  - https://portswigger.net/web-security/sql-injection/lab-login-bypass
+  - ../writeup.md
+author: Kai-Chun Yang
+date: 2026/07/01
+logsource:
+  category: webserver
+detection:
+  is_login:
+    cs-method: 'POST'
+    cs-uri-stem: '/'
+  sqli_in_body:
+    cs-body|contains:
+      - "'--"
+      - "'%2D%2D"       # URL-encoded --
+      - "' OR "
+      - "'%20OR%20"
+      - "OR 1=1"
+      - "UNION SELECT"
+  condition: is_login and sqli_in_body
+falsepositives:
+  - 密碼本可為任意字元；若誤報高，改用「login 成功 + username 欄位含 SQL meta 字元」的關聯規則
+  - 合法輸入含撇號 — 靠組合特徵收斂
+level: high
+tags:
+  - attack.initial_access
+  - attack.t1190

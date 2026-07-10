@@ -1,0 +1,25 @@
+# Sigma 偵測規則樣板
+# 參考：https://github.com/SigmaHQ/sigma-specification
+title: {簡短描述這條規則抓什麼，例：SQL Injection Login Bypass Attempt}
+id: {產生一個 UUID：python -c "import uuid;print(uuid.uuid4())"}
+status: experimental
+description: {這條規則偵測什麼攻擊、對應哪個漏洞}
+references:
+  - {PortSwigger / CVE / 本 lab writeup 連結}
+author: {你的名字}
+date: YYYY/MM/DD
+logsource:
+  category: application
+  product: {web app 名稱}
+detection:
+  selection:
+    {欄位}:
+      - '{攻擊特徵，例：*OR 1=1*}'
+      - "*'--*"
+  condition: selection
+falsepositives:
+  - {正常情況下什麼會誤觸}
+level: high
+tags:
+  - attack.initial_access
+  - {對應 MITRE ATT&CK technique}
