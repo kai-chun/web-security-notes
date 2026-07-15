@@ -2,7 +2,7 @@
 
 > 這份檔案是給 AI 助理（Claude Opus / Sonnet / Fable 等）的作業規範。
 > 目標：任何模型接手時，都能以**一致的方式協助使用者親手產出** lab 成果，不用重新猜慣例。
-> **最強的參照物是 `sql-injection/02-lab-login-bypass/`——有疑問時，照它做。**
+> **最強的參照物是 `sql-injection/01-lab-login-bypass/`——有疑問時，照它做。**
 
 ---
 
@@ -24,7 +24,7 @@
 
 **允許 / 鼓勵**：
 - 讀使用者手寫的程式與文字，指出 bug、邏輯漏洞、與 repo 慣例（§1–§9）的偏差。
-- 解釋**為什麼**——原理、trade-off、常見錯誤修法為何擋不住，對照黃金範例 #02。
+- 解釋**為什麼**——原理、trade-off、常見錯誤修法為何擋不住，對照黃金範例 #01。
 - 用蘇格拉底式提問給方向（例：「這裡該用參數化查詢，想想 template 和參數為何要分開編譯？」），
   而不是直接給正解程式碼。
 - 跑閉環驗證（§9）：起 container、跑 exploit、比對 detection 規則，**幫使用者確認對錯**——
@@ -80,8 +80,8 @@ Web security 學習筆記。每個 lab 圍繞一個漏洞，用 **purple team（
     └── {slug}-http.yml     # HTTP 層規則
 ```
 
-- **命名**：`{NN}-lab-{slug}`，NN 兩位數（`02-lab-login-bypass`）。category 用漏洞類別（`sql-injection`）。
-- **新 lab 從 `template/` 複製**，不要從零手寫；template 是骨架，實例照 #02 填。
+- **命名**：`{NN}-lab-{slug}`，NN 兩位數（`01-lab-login-bypass`）。category 用漏洞類別（`sql-injection`）。
+- **新 lab 從 `template/` 複製**，不要從零手寫；template 是骨架，實例照 #01 填。
 
 ---
 
@@ -136,7 +136,7 @@ exploit.py 規範：
   docker compose --profile go up            # 只起 go stack
   docker compose --profile py --profile go up   # 兩邊一起，side-by-side
   ```
-- 某語言的 secure 版還沒寫時，在 compose 裡**留註解的 stub**（見 #02 的 `secure-go`），別直接刪掉。
+- 某語言的 secure 版還沒寫時，在 compose 裡**留註解的 stub**（見 #01 的 `secure-go`），別直接刪掉。
 
 ---
 
@@ -150,7 +150,7 @@ exploit.py 規範：
 - Fix 段要說清楚**為什麼**正解有效（例：parameterized query 是「template 與參數分開編譯/bind」，
   不是「加了 `?` 符號」），並列「常見錯誤修法為什麼擋不住」。
 - 「縱深防禦」要標明**不取代**主修法、只縮小爆炸半徑。
-- 黃金範例：[`sql-injection/02-lab-login-bypass/writeup.md`](sql-injection/02-lab-login-bypass/writeup.md)。
+- 黃金範例：[`sql-injection/01-lab-login-bypass/writeup.md`](sql-injection/01-lab-login-bypass/writeup.md)。
 
 ---
 
@@ -225,7 +225,7 @@ python3 exploits/exploit.py --target http://localhost:8003
 > 只要說一句觸發語，我就把下面整套跑完並回報一張「三條件過/不過」的表。
 
 **觸發語**（任一句都算）：「驗證 <lab>」／「verify <lab>」。
-- `<lab>` 可給路徑（`sql-injection/02-lab-login-bypass`）或 slug（`login-bypass`）。
+- `<lab>` 可給路徑（`sql-injection/01-lab-login-bypass`）或 slug（`login-bypass`）。
 - **沒指定時**：預設驗「當前正在做的 lab」——先看 git branch 名，再看剛剛動過的檔案；
   兩者無法判斷時才反問是哪個 lab。
 

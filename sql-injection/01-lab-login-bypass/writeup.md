@@ -1,4 +1,4 @@
-# SQL Injection #02: SQL injection vulnerability allowing login bypass
+# SQL Injection #01: SQL injection vulnerability allowing login bypass
  
 > PortSwigger Lab: [SQL injection vulnerability allowing login bypass](https://portswigger.net/web-security/sql-injection/lab-login-bypass)
 >
