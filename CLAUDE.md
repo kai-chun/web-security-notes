@@ -73,6 +73,7 @@ Web security 學習筆記。每個 lab 圍繞一個漏洞，用 **purple team（
 │   └── go/      (main.go, go.mod, go.sum)
 ├── exploits/               # ⚠️ 不分 go/python，見 §3
 │   ├── exploit.py
+│   ├── requirements.txt    # 用到第三方套件時才需要；鎖版本（見 §3）
 │   └── README.md
 └── detection/
     ├── README.md
@@ -107,7 +108,11 @@ Web security 學習筆記。每個 lab 圍繞一個漏洞，用 **purple team（
 - **不要**建 `exploits/go/`、`exploits/python/`。這支 PoC 順便證明「同一招通吃兩種後端」。
 
 exploit.py 規範：
-- **零依賴**，只用 Python stdlib（`urllib`、`argparse`），不要 `requests`。
+- **相依套件：優先 stdlib**（`urllib`、`argparse`）。當 stdlib 體感太差時（如 blind SQLi
+  需要大量 request、session 重用），**可用第三方套件**，但必須：
+  1. 在 `exploits/requirements.txt` 列出並**鎖版本**（`httpx==0.27.0`）。
+  2. 在 exploit.py 頂部 docstring 寫明相依與安裝方式（`pip install -r exploits/requirements.txt`）。
+  沒有 requirements.txt 就等於承諾零依賴——不要 import 沒列進去的套件。
 - **exit code**：`0` = 至少一個 payload 成功；非 0 = 全部失敗。CI / 閉環驗證靠這個。
 - 每個 payload 附一句「為什麼會成功」的說明；成功用 ANSI 綠色標 `BYPASSED`。
 - 頂部 docstring 寫清楚用法（怎麼起目標、怎麼跑）。
@@ -199,6 +204,9 @@ exploit.py 規範：
 cd {category}/{NN}-lab-{slug}
 docker compose --profile py --profile go up -d       # 起目標
 
+# exploit 若有第三方相依（見 §3），先裝；沒有 requirements.txt 可略過
+[ -f exploits/requirements.txt ] && pip install -r exploits/requirements.txt
+
 python3 exploits/exploit.py \
   --target http://localhost:8001 \
   --target http://localhost:8002                       # 應 exit 0 且 vuln 版被 BYPASSED
@@ -235,6 +243,9 @@ python3 exploits/exploit.py --target http://localhost:8003
 cd "$LAB"
 docker compose --profile py --profile go up -d --build      # 只起該 lab 有定義的 service
 # 等 container ready（輪詢 curl，不要盲等 sleep）
+
+# exploit 若有第三方相依（見 §3），先裝；沒有 requirements.txt 可略過
+[ -f exploits/requirements.txt ] && pip install -r exploits/requirements.txt
 
 # 條件1：打 vulnerable（存在才打：vuln-py :8001 / vuln-go :8002）
 python3 exploits/exploit.py --target http://localhost:8001 --target http://localhost:8002
