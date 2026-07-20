@@ -1,0 +1,30 @@
+title: SQL Injection Blind Conditional Response — Attempt in Application SQL Log
+id: 7b42db71-c2b5-4be3-b87f-204093b63862
+status: experimental
+description: >
+  偵測 tracking cookie 查詢的 SQL 中出現注入特徵 (恆真/恆假條件、subquery 抽取)，
+  對應 blind SQLi conditional response，判斷、推算出 administrator 的密碼。
+references:
+  - https://portswigger.net/web-security/sql-injection/blind/lab-conditional-responses
+  - ../writeup.md
+author: Kai-Chun Yang
+date: 2026/07/20
+logsource:
+  category: application
+  product: tracking-cookie        # go/python vuln app 的 [DEBUG] Executing: 行
+detection:
+  # 這行的攻擊特徵：AND 用以注入自訂的條件、subquery 抽取
+  sqli_markers:
+    message|contains:
+      - "' AND "
+      - "(SELECT LENGTH("
+      - "(SELECT SUBSTRING"
+  is_tracking_query:
+    message|contains: 'WHERE tracking_id ='
+  condition: sqli_markers and is_tracking_query
+falsepositives:
+  - cookie 的 tracking_id 檢查正常是不會帶有 'AND' 等內容，所以很難誤報
+level: high
+tags:
+  - attack.initial_access
+  - attack.t1190          # Exploit Public-Facing Application
