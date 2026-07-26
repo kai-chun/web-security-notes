@@ -1,0 +1,37 @@
+services:
+  vuln-py:
+    build:
+      context: ./vulnerable_app/python
+      dockerfile: ../../python.Dockerfile
+    ports: ["8001:5000"]
+    profiles: ["py"]
+
+  vuln-go:
+    build:
+      context: ./vulnerable_app/go
+      dockerfile: ../../go.Dockerfile
+    ports: ["8002:5000"]
+    profiles: ["go"]
+
+  secure-py:
+    build:
+      context: ./secure_app/python
+      dockerfile: ../../python.Dockerfile
+    ports: ["8003:5000"]
+    profiles: ["py"]
+
+  secure-go:
+    build:
+      context: ./secure_app/go
+      dockerfile: ../../go.Dockerfile
+    ports: ["8004:5000"]
+    profiles: ["go"]
+
+  # add a `db:` service with `profiles: ["py","go"]` if the lab needs an external DB
+  # exploits/ are run as one-off scripts (python exploits/python/exploit.py),
+  # not as compose services.
+
+# usage:
+#   docker compose --profile py up
+#   docker compose --profile go up
+#   docker compose --profile py --profile go up

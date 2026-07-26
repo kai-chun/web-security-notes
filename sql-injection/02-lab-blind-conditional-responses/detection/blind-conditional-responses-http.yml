@@ -1,0 +1,29 @@
+title: SQL Injection Blind Conditional Response — Attempt in HTTP Request
+id: 0b8d1af9-a958-4e3d-8977-8d57e4ebe729
+status: experimental
+description: >
+  偵測 HTTP request 中的 cookie 是否出現注入特徵 (恆真/恆假條件、subquery 抽取)，
+  對應 blind SQLi conditional response，判斷、推算出 administrator 的密碼。
+references:
+  - https://portswigger.net/web-security/sql-injection/blind/lab-conditional-responses
+  - ../writeup.md
+author: Kai-Chun Yang
+date: 2026/07/20
+logsource:
+  category: webserver
+detection:
+  is_tracking_query:
+    cs-method: 'GET'
+    cs-uri-stem: '/'
+  sqli_in_cookie:
+    cs-cookie|contains:
+      - "' AND "
+      - "(SELECT LENGTH("
+      - "(SELECT SUBSTRING"
+  condition: is_tracking_query and sqli_in_cookie
+falsepositives:
+  - cookie 的 tracking_id 檢查正常是不會帶有 'AND' 等內容，所以很難誤報
+level: high
+tags:
+  - attack.initial_access
+  - attack.t1190

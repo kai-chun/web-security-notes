@@ -2,7 +2,10 @@
 
 > 這份檔案是給 AI 助理（Claude Opus / Sonnet / Fable 等）的作業規範。
 > 目標：任何模型接手時，都能以**一致的方式協助使用者親手產出** lab 成果，不用重新猜慣例。
-> **最強的參照物是 `sql-injection/01-lab-login-bypass/`——有疑問時，照它做。**
+> **最強的參照物是 `sql-injection/01-lab-login-bypass/`——目錄結構、四視角流程、檔案慣例有疑問時，照它做。**
+> 但這是「慣例的參照」，不是「逐字複製」：**具體值**（依賴版本 / 版本基準、種子帳密、port 以外的可調參數等）
+> 該依當下判斷決定，不必和 #01 一模一樣——只要**同一個 lab 內部自洽**（見 §2 的一致性要求）即可。
+> 例：某 lab 的 `go.mod` 用較新的 Go 與 sqlite 版本、種子密碼不帶底線，都沒問題。
 
 ---
 
@@ -73,6 +76,7 @@ Web security 學習筆記。每個 lab 圍繞一個漏洞，用 **purple team（
 │   └── go/      (main.go, go.mod, go.sum)
 ├── exploits/               # ⚠️ 不分 go/python，見 §3
 │   ├── exploit.py
+│   ├── requirements.txt    # 用到第三方套件時才需要；鎖版本（見 §3）
 │   └── README.md
 └── detection/
     ├── README.md
@@ -92,7 +96,9 @@ Web security 學習筆記。每個 lab 圍繞一個漏洞，用 **purple team（
 
 - 同樣的路由（`/`）、同樣的表單欄位、同樣的成功訊息（`Welcome, {user}! (id=...)`）。
 - 容器內都聽 **port 5000**（對外 port 由 compose 映射，見 §4）。
-- 種子資料一致：user `administrator` / `super_secret_password_123`，SQLite `users.db`。
+- 種子資料**在同一個 lab 內要一致**（py 版與 go 版、vuln 與 secure、exploit 的預期值都用同一組）：
+  user `administrator` / 一組密碼 / SQLite `users.db`。密碼**確切字串由該 lab 自己決定**（帶不帶底線都行，
+  例 `super_secret_password_123` 或 `supersecretpassword123`）——重點是四支 app 與 exploit 對齊，不是跟 #01 一樣。
 - vulnerable 版要留一行 `[DEBUG] Executing: <完整SQL>`，讓 `detection/` 的 app-log 規則有東西抓
   （現實不會這樣做，這是教學用；writeup / detection README 要註明這個 caveat）。
 
@@ -107,7 +113,11 @@ Web security 學習筆記。每個 lab 圍繞一個漏洞，用 **purple team（
 - **不要**建 `exploits/go/`、`exploits/python/`。這支 PoC 順便證明「同一招通吃兩種後端」。
 
 exploit.py 規範：
-- **零依賴**，只用 Python stdlib（`urllib`、`argparse`），不要 `requests`。
+- **相依套件：優先 stdlib**（`urllib`、`argparse`）。當 stdlib 體感太差時（如 blind SQLi
+  需要大量 request、session 重用），**可用第三方套件**，但必須：
+  1. 在 `exploits/requirements.txt` 列出並**鎖版本**（`httpx==0.27.0`）。
+  2. 在 exploit.py 頂部 docstring 寫明相依與安裝方式（`pip install -r exploits/requirements.txt`）。
+  沒有 requirements.txt 就等於承諾零依賴——不要 import 沒列進去的套件。
 - **exit code**：`0` = 至少一個 payload 成功；非 0 = 全部失敗。CI / 閉環驗證靠這個。
 - 每個 payload 附一句「為什麼會成功」的說明；成功用 ANSI 綠色標 `BYPASSED`。
 - 頂部 docstring 寫清楚用法（怎麼起目標、怎麼跑）。
@@ -199,6 +209,9 @@ exploit.py 規範：
 cd {category}/{NN}-lab-{slug}
 docker compose --profile py --profile go up -d       # 起目標
 
+# exploit 若有第三方相依（見 §3），先裝；沒有 requirements.txt 可略過
+[ -f exploits/requirements.txt ] && pip install -r exploits/requirements.txt
+
 python3 exploits/exploit.py \
   --target http://localhost:8001 \
   --target http://localhost:8002                       # 應 exit 0 且 vuln 版被 BYPASSED
@@ -236,6 +249,9 @@ cd "$LAB"
 docker compose --profile py --profile go up -d --build      # 只起該 lab 有定義的 service
 # 等 container ready（輪詢 curl，不要盲等 sleep）
 
+# exploit 若有第三方相依（見 §3），先裝；沒有 requirements.txt 可略過
+[ -f exploits/requirements.txt ] && pip install -r exploits/requirements.txt
+
 # 條件1：打 vulnerable（存在才打：vuln-py :8001 / vuln-go :8002）
 python3 exploits/exploit.py --target http://localhost:8001 --target http://localhost:8002
 #   期望 exit 0，且輸出有 BYPASSED
@@ -253,7 +269,7 @@ docker compose logs vuln-py vuln-go 2>/dev/null \
 
 #   3b 正常登入該不誤報：送一次合法帳密，該 DEBUG 行不含攻擊特徵
 curl -s -X POST http://localhost:8001 \
-  --data 'username=administrator&password=super_secret_password_123' >/dev/null
+  --data 'username=administrator&password=<該 lab 的種子密碼>' >/dev/null
 docker compose logs --since 5s vuln-py 2>/dev/null \
   | grep -E "WHERE username =" | grep -Ei "'--|' OR |OR 1=1|UNION SELECT"   # 期望：無命中
 
