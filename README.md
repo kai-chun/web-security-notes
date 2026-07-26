@@ -37,6 +37,7 @@ artifact; AI only reviews) — lives in [CLAUDE.md](CLAUDE.md).
 | #  | Technique                     | Category      | Writeup | Vuln code   | Fix |
 |----|-------------------------------|---------------|:-------:|:-----------:|:---:|
 | 01 | Login bypass via SQL injection | SQL Injection | v      | py / go     | v  |
+| 02 | Blind SQL injection with conditional responses | SQL Injection | v      | py / go     | v  |
 
 **Roadmap** — one technique per lab: UNION-based extraction, boolean-based blind,
 error-based, time-based blind, out-of-band (OAST), and WAF/filter bypass.
