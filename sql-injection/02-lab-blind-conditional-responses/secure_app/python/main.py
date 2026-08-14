@@ -1,5 +1,5 @@
 """
-curl -s http://localhost:8001 --cookie "TrackingId=TFYzlWqLrDp413AF"
+curl -s http://localhost:8003 --cookie "TrackingId=TFYzlWqLrDp413AF"
 """
 import sqlite3
 from contextlib import closing
@@ -78,7 +78,6 @@ def get_page():
             else:
                 traced_msg = ""
         except sqlite3.Error as e:
-            # Leaking error messages also helps attackers — another bad practice
             logging.exception("[GetSession] Query tracked user failed, error=%s", e)
 
     return render_template_string(LOGIN_PAGE, traced_msg=traced_msg)

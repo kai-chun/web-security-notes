@@ -1,5 +1,6 @@
-// Test the vulnerability:
-// curl -s http://localhost:8004 --cookie "TrackingId=TFYzlWqLrDp413AF"
+// Verify normal behavior and confirm that SQL injection is blocked:
+// Normal: curl -s http://localhost:8004 --cookie "TrackingId=TFYzlWqLrDp413AF"
+// Injection attempt: curl -s http://localhost:8004 --cookie "TrackingId=invalid' OR '1'='1"
 
 package main
 
