@@ -7,8 +7,9 @@
 ## Log source
 
 兩支 vuln app 都會印出 debug SQL
+
 - Python app：[python main.py:72](../vulnerable_app/python/main.py#L72)
-- Go app：[go main.go](../vulnerable_app/go/main.go)、
+- Go app：[go main.go](../vulnerable_app/go/main.go#L95)
 
 ```
 [DEBUG] Executing: SELECT tracking_id FROM tracked_users WHERE tracking_id = 'TFYz...' AND (SELECT SUBSTRING(password,1,1) FROM users WHERE username='administrator')='a'
@@ -19,10 +20,10 @@
 
 ## 兩條規則
 
-| 檔案 | 打哪一層 | 適用情境 |
-|-----|----------|----------|
-| blind-conditional-responses-app.yml | 應用 debug log (完整 SQL | 開發 / 本 lab 可直接命中) |
-| blind-conditional-responses-http.yml | HTTP 請求的 Cookie header(cs-cookie) | 貼近上線 access log |
+| 檔案                                 | 打哪一層                             | 適用情境                  |
+| ------------------------------------ | ------------------------------------ | ------------------------- |
+| blind-conditional-responses-app.yml  | 應用 debug log (完整 SQL             | 開發 / 本 lab 可直接命中) |
+| blind-conditional-responses-http.yml | HTTP 請求的 Cookie header(cs-cookie) | 貼近上線 access log       |
 
 ## 誤報邊界
 
